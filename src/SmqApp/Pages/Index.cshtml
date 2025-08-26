@@ -1,0 +1,47 @@
+@page
+@model SmqApp.Pages.IndexModel
+
+<h1 class="mb-4">Database Results - Pick List</h1>
+
+<div class="row">
+  <div class="col-md-5">
+    <label for="left" class="form-label fw-bold">Available</label>
+    <select id="left" class="form-select" size="10" multiple>
+      @foreach (var w in Model.Widgets)
+      {
+          <option value="@w.Id">@w.Name</option>
+      }
+    </select>
+  </div>
+
+  <div class="col-md-2 d-flex align-items-center justify-content-center">
+    <button id="btn" type="button" class="btn btn-primary">
+      <i class="bi bi-arrow-right"></i>
+      →
+    </button>
+  </div>
+
+  <div class="col-md-5">
+    <label for="right" class="form-label fw-bold">Selected</label>
+    <select id="right" class="form-select" size="10" multiple></select>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const left = document.getElementById('left');
+  const right = document.getElementById('right');
+  const btn = document.getElementById('btn');
+
+  btn.addEventListener('click', function () {
+    const selected = Array.from(left.selectedOptions);
+    selected.forEach(opt => {
+      // Move option
+      right.add(new Option(opt.text, opt.value));
+      opt.remove();
+    });
+  });
+});
+</script>
+}

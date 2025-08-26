@@ -1,0 +1,35 @@
+version: "3.9"
+name: smqapp
+services:
+  mariadb:
+    image: mariadb:11
+    platform: linux/arm64
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+      MARIADB_DATABASE: ${DB_NAME:-pocdb}
+      MARIADB_USER: ${DB_USER:-pocuser}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-StrongPassword123!}
+    ports: ["3306:3306"]
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      - ./db-init:/docker-entrypoint-initdb.d
+  web:
+    build:
+      context: ./src/SmqApp
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on: [mariadb]
+    environment:
+      AzureAd__Instance: "https://login.microsoftonline.com/"
+      AzureAd__Domain: "${AZUREAD_DOMAIN}"
+      AzureAd__TenantId: "${AZUREAD_TENANT_ID}"
+      AzureAd__ClientId: "${AZUREAD_CLIENT_ID}"
+      AzureAd__ClientSecret: "${AZUREAD_CLIENT_SECRET}"
+      AzureAd__CallbackPath: "/signin-oidc"
+      Authorization__AllowedGroupObjectId: "${ALLOWED_GROUP_OBJECT_ID}"
+      ConnectionStrings__MariaDb: "Server=mariadb;Port=3306;Database=${DB_NAME:-pocdb};User Id=${DB_USER:-pocuser};Password=${DB_PASSWORD:-StrongPassword123!};TreatTinyAsBoolean=false;SslMode=None"
+      ASPNETCORE_ENVIRONMENT: "Development"
+    ports: ["8080:8080"]
+volumes:
+  mariadb-data:
